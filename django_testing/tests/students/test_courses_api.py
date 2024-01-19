@@ -42,10 +42,11 @@ def test_course_update(api_client, course_factory):
     course_amount = 20
     courses = course_factory(_quantity=course_amount)
     random_num = randint(1, course_amount)
-    url = reverse('courses-detail', kwargs={'pk': random_num})
+    course_id = courses[random_num - 1].id
+    url = reverse('courses-detail', kwargs={'pk': course_id})
     response = api_client.patch(url, data={'name': 'patched name'})
     data = response.json()
-    filtered_course = Course.objects.filter(id=random_num)
+    filtered_course = Course.objects.filter(id=course_id)
     assert data['name'] == filtered_course.get().name
     assert response.status_code == 200
 
@@ -55,7 +56,8 @@ def test_course_delete(api_client, course_factory):
     course_amount = 20
     courses = course_factory(_quantity=course_amount)
     random_num = randint(1, course_amount)
-    url = reverse('courses-detail', kwargs={'pk': random_num})
+    course_id = courses[random_num - 1].id
+    url = reverse('courses-detail', kwargs={'pk': course_id})
     response = api_client.delete(url)
     assert response.status_code == 204
 
@@ -65,10 +67,11 @@ def test_course_id_filtration(api_client, course_factory):
     course_amount = 100
     courses = course_factory(_quantity=course_amount)
     random_num = randint(1, course_amount)
+    course_id = courses[random_num - 1].id
     qs = Course.objects.all()
     filter = CourseFilter()
-    result_course = filter.custom_filter(qs, 'id', random_num)
-    assert result_course.get().id == courses[random_num - 1].id
+    result_course = filter.custom_filter(qs, 'id', course_id)
+    assert result_course.get().id == course_id
 
 
 @pytest.mark.django_db
