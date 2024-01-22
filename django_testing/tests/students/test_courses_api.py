@@ -9,10 +9,12 @@ from students.filters import CourseFilter
 @pytest.mark.django_db
 def test_one_course(api_client, course_factory):
     course = course_factory(_quantity=1)
-    url = reverse('courses-list')
+    course_id = course[0].id
+    url = reverse('courses-detail', kwargs={'pk': course_id})
     response = api_client.get(url)
     data = response.json()
-    assert data[0]['name'] == course[0].name
+    assert data['name'] == course[0].name
+    assert data['id'] == course_id
     assert response.status_code == 200
 
 
