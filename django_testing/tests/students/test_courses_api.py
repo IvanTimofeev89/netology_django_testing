@@ -4,7 +4,6 @@ import pytest
 from django.urls import reverse
 
 from students.models import Course
-from tests.conftest import api_client, student_factory, course_factory
 from students.filters import CourseFilter
 
 @pytest.mark.django_db
@@ -64,24 +63,25 @@ def test_course_delete(api_client, course_factory):
 
 @pytest.mark.django_db
 def test_course_id_filtration(api_client, course_factory):
-    course_amount = 100
+    course_amount = 20
     courses = course_factory(_quantity=course_amount)
     random_num = randint(1, course_amount)
     course_id = courses[random_num - 1].id
-    qs = Course.objects.all()
-    filter = CourseFilter()
-    result_course = filter.custom_filter(qs, 'id', course_id)
-    assert result_course.get().id == course_id
+    url = reverse('courses-detail', kwargs={'pk': course_id})
+    response = api_client.get(url)
+    data = response.json()
+    assert response.status_code == 200
+    assert data['id'] == course_id
 
 
 @pytest.mark.django_db
 def test_course_name_filtration(api_client, course_factory):
-    course_amount = 100
+    course_amount = 20
     courses = course_factory(_quantity=course_amount)
     random_num = randint(1, course_amount)
     course_name = courses[course_amount - 1].name
-    qs = Course.objects.all()
-    filter = CourseFilter()
-    result_course = filter.custom_filter(qs, 'name', course_name)
-    assert result_course.get().name == course_name
-
+    url = reverse('courses-list')
+    response = api_client.get(url, data={'name': course_name})
+    data = response.json()
+    assert response.status_code == 200
+    assert data[0].get('name') == course_name
